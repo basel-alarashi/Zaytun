@@ -68,6 +68,8 @@ coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
+cookies.txt
+cookie-example.txt
 
 # Docker
 *.pid
