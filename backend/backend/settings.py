@@ -122,13 +122,27 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+# CSRF / session cookie settings for a cross-port SPA (ADR-007)
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in _get_env(
+        "DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+    ).split(",")
+    if origin.strip()
+]
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SECURE = _get_env("DJANGO_CSRF_COOKIE_SECURE", "False") == "True"
+SESSION_COOKIE_SECURE = _get_env("DJANGO_SESSION_COOKIE_SECURE", "False") == "True"
+
 # REST Framework settings
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.openapi.AutoSchema",
     # Session-based auth per ADR-007. No endpoints require authentication yet
     # (Sprint 2 introduces login/me and per-view permission classes).
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
+        "accounts.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
