@@ -17,8 +17,6 @@ from rest_framework.views import exception_handler as drf_exception_handler
 
 logger = logging.getLogger(__name__)
 
-# Order matters only in that every exception type here is mutually exclusive
-# in practice, so a plain dict lookup by isinstance() is sufficient.
 _EXCEPTION_CODES = {
     ValidationError: "VALIDATION_ERROR",
     NotAuthenticated: "UNAUTHENTICATED",
@@ -41,6 +39,15 @@ _DEFAULT_MESSAGES = {
     "SERVER_ERROR": "An unexpected error occurred.",
 }
 
+_STATUS_CODES = {
+    "VALIDATION_ERROR": status.HTTP_400_BAD_REQUEST,
+    "UNAUTHENTICATED": status.HTTP_401_UNAUTHORIZED,
+    "PERMISSION_DENIED": status.HTTP_403_FORBIDDEN,
+    "NOT_FOUND": status.HTTP_404_NOT_FOUND,
+    "METHOD_NOT_ALLOWED": status.HTTP_405_METHOD_NOT_ALLOWED,
+    "THROTTLED": status.HTTP_429_TOO_MANY_REQUESTS,
+}
+
 
 def _resolve_code(exc):
     for exc_type, code in _EXCEPTION_CODES.items():
@@ -50,7 +57,6 @@ def _resolve_code(exc):
 
 
 def _extract_details(exc):
-    """Best-effort extraction of field-level details from DRF's exception data."""
     detail = getattr(exc, "detail", None)
     if isinstance(detail, dict):
         return detail
@@ -61,19 +67,13 @@ def _extract_details(exc):
     return {}
 
 
+def _is_request_authenticated(context):
+    request = context.get("request")
+    user = getattr(request, "user", None)
+    return bool(user and getattr(user, "is_authenticated", False))
+
+
 def custom_exception_handler(exc, context):
-    """
-    Reshape every API error response into Zaytun's canonical error contract:
-
-        {"code": "...", "message": "...", "details": {...}}
-
-    (see 10_API_Specification.md §12).
-
-    Exceptions DRF itself doesn't recognize (i.e. anything that isn't an
-    APIException/Http404/Django PermissionDenied) fall through to a safe,
-    non-leaking 500 response, and are logged server-side so they remain
-    diagnosable (NFR-011) without exposing internals to the client.
-    """
     response = drf_exception_handler(exc, context)
 
     if response is None:
@@ -90,6 +90,11 @@ def custom_exception_handler(exc, context):
         )
 
     code = _resolve_code(exc)
+
+    if code == "PERMISSION_DENIED" and not _is_request_authenticated(context):
+        code = "UNAUTHENTICATED"
+
+    response.status_code = _STATUS_CODES.get(code, response.status_code)
     response.data = {
         "code": code,
         "message": _DEFAULT_MESSAGES.get(code, "The request could not be processed."),

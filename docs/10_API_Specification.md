@@ -31,10 +31,11 @@ Use conventional HTTP semantics:
 POST /auth/register/
 POST /auth/login/
 POST /auth/logout/
+GET /auth/csrf/
 GET  /auth/me/
 ```
 
-The authentication implementation (session or token strategy) is an ADR decision.
+The authentication implementation (session or token strategy) is an ADR decision. (Added in '/decisions/ADR-007-Authentication.md')
 
 ## 3. Farmers & Storefronts
 

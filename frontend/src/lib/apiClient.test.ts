@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { apiClient, ApiError } from "../lib/apiClient";
+import { apiClient, ApiError } from "./apiClient";
 
 describe("apiClient", () => {
   afterEach(() => {
@@ -54,5 +54,24 @@ describe("apiClient", () => {
       code: "UNKNOWN_ERROR",
       status: 502,
     });
+  });
+
+  it("attaches X-CSRFToken from the cookie on unsafe methods, but not on GET", async () => {
+    document.cookie = "csrftoken=test-csrf-value";
+    const fetchMock = vi.fn().mockImplementation(
+      async () => new Response(JSON.stringify({ ok: true }), { status: 200 })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await apiClient.post("/auth/login/", { email: "a@example.com", password: "pw" });
+    await apiClient.get("/auth/me/");
+
+    const [postCall, getCall] = fetchMock.mock.calls;
+    expect((postCall[1].headers as Record<string, string>)["X-CSRFToken"]).toBe(
+      "test-csrf-value"
+    );
+    expect((getCall[1].headers as Record<string, string>)["X-CSRFToken"]).toBeUndefined();
+
+    document.cookie = "csrftoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
   });
 });

@@ -1,50 +1,28 @@
-import { useEffect, useState } from "react";
-import { apiClient, ApiError } from "./lib/apiClient";
-import "./App.css";
-
-interface HealthResponse {
-  message: string;
-}
-
-type HealthState =
-  | { status: "loading" }
-  | { status: "success"; message: string }
-  | { status: "error"; message: string };
+import { Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./features/auth/AuthProvider";
+import { RequireAuth } from "./features/auth/RequireAuth";
+import { HomePage } from "./pages/HomePage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { DashboardPage } from "./pages/DashboardPage";
 
 function App() {
-  const [health, setHealth] = useState<HealthState>({ status: "loading" });
-
-  useEffect(() => {
-    let cancelled = false;
-
-    apiClient
-      .get<HealthResponse>("health/")
-      .then((data) => {
-        if (!cancelled) setHealth({ status: "success", message: data.message });
-      })
-      .catch((error: unknown) => {
-        if (cancelled) return;
-        const message =
-          error instanceof ApiError
-            ? error.message
-            : "Could not reach the Zaytun API.";
-        setHealth({ status: "error", message });
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   return (
-    <main>
-      <h1>Zaytun</h1>
-      {health.status === "loading" && (
-        <p role="status">Checking API connection…</p>
-      )}
-      {health.status === "success" && <p role="status">{health.message}</p>}
-      {health.status === "error" && <p role="alert">{health.message}</p>}
-    </main>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <DashboardPage />
+            </RequireAuth>
+          }
+        />
+      </Routes>
+    </AuthProvider>
   );
 }
 
