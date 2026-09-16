@@ -4,6 +4,8 @@ from django.urls import path, include
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include("api.urls")),
+    path("api/v1/", include("farmer.urls")),
+    path("api/v1/", include("catalog.urls")),
 ]
 
 # Requests that don't match any URL pattern at all (so they never reach a
