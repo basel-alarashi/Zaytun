@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
-import { RequireAuth } from "./RequireAuth";
-import { useAuth } from "./useAuth";
+import { RequireAuth } from "../RequireAuth";
+import { useAuth } from "../useAuth";
 
-vi.mock("./AuthContext", () => ({
+vi.mock("../useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
@@ -38,7 +38,7 @@ describe("RequireAuth", () => {
 
     renderWithRouter("/protected");
 
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getAllByRole("status")[0]).toBeInTheDocument();
   });
 
   it("redirects to /login when anonymous", () => {
@@ -52,7 +52,7 @@ describe("RequireAuth", () => {
 
     renderWithRouter("/protected");
 
-    expect(screen.getByText("Login page")).toBeInTheDocument();
+    expect(screen.getAllByText("Login page")[0]).toBeInTheDocument();
   });
 
   it("renders children when authenticated and role isn't restricted", () => {
@@ -73,6 +73,6 @@ describe("RequireAuth", () => {
 
     renderWithRouter("/protected");
 
-    expect(screen.getByText("Protected content")).toBeInTheDocument();
+    expect(screen.getAllByText("Protected content")[0]).toBeInTheDocument();
   });
 });

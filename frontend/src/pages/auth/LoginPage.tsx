@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../features/auth/useAuth";
-import { ApiError } from "../lib/apiClient";
+import { useAuth } from "../../features/auth/useAuth";
+import { ApiError } from "../../lib/apiClient";
 
 interface LocationState {
   from?: { pathname: string };

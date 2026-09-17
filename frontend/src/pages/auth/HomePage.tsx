@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { apiClient, ApiError } from "../lib/apiClient";
-import { useAuth } from "../features/auth/useAuth";
+import { apiClient, ApiError } from "../../lib/apiClient";
+import { useAuth } from "../../features/auth/useAuth";
 
 interface HealthResponse {
   message: string;

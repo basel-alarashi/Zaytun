@@ -1,12 +1,12 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
-import { AuthProvider } from "./AuthProvider";
-import { useAuth } from './useAuth';
-import { authApi } from "./authApi";
-import { ApiError } from "../../lib/apiClient";
+import { AuthProvider } from "../AuthProvider";
+import { useAuth } from '../useAuth';
+import { authApi } from "../authApi";
+import { ApiError } from "../../../lib/apiClient";
 
-vi.mock("./authApi", () => ({
+vi.mock("../authApi", () => ({
   authApi: {
     ensureCsrfCookie: vi.fn(),
     me: vi.fn(),

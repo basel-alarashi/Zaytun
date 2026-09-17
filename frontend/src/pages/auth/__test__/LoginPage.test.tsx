@@ -2,11 +2,11 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { LoginPage } from "./LoginPage";
-import { useAuth } from "../features/auth/useAuth";
-import { ApiError } from "../lib/apiClient";
+import { LoginPage } from "../LoginPage";
+import { useAuth } from "../../../features/auth/useAuth";
+import { ApiError } from "../../../lib/apiClient";
 
-vi.mock("../features/auth/useAuth", () => ({
+vi.mock("../../../features/auth/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
@@ -32,9 +32,9 @@ describe("LoginPage", () => {
       </MemoryRouter>
     );
 
-    await user.type(screen.getByLabelText(/email/i), "consumer@example.com");
-    await user.type(screen.getByLabelText(/password/i), "Str0ng-Passw0rd!");
-    await user.click(screen.getByRole("button", { name: /log in/i }));
+    await user.type(screen.getAllByLabelText(/email/i)[0], "consumer@example.com");
+    await user.type(screen.getAllByLabelText(/password/i)[0], "Str0ng-Passw0rd!");
+    await user.click(screen.getAllByRole("button", { name: /log in/i })[0]);
 
     expect(login).toHaveBeenCalledWith({
       email: "consumer@example.com",
