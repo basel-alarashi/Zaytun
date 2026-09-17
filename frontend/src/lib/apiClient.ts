@@ -1,15 +1,11 @@
-export interface ApiErrorPayload {
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
-}
-
 /**
  * Typed representation of Zaytun's canonical API error contract
  * (see 10_API_Specification.md §12). Thrown by apiClient for every
  * non-2xx response, so callers can branch on `.code` instead of
  * inspecting raw HTTP status codes or unparsed bodies.
  */
+import type { ApiErrorPayload } from '../types/errors';
+
 export class ApiError extends Error {
   readonly code: string;
   readonly status: number;
